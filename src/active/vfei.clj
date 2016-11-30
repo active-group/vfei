@@ -250,9 +250,15 @@
   (case format
     :a (decode-vfei-string s)
     :n (decode-vfei-n s)
+    :b (parse-integer s) ;; FIXME: is this binary? Is parse-integer OK?
+    :i1 (parse-integer s) ;; FIXME: validation
+    :i2 (parse-integer s) ;; FIXME: validation
     :i4 (parse-integer s) ;; FIXME: validation
     :i8 (parse-integer s) ;; FIXME: validation
+    :u1 (parse-integer s)
+    :u2 (parse-integer s)
     :u4 (parse-integer s)
+    :u8 (parse-integer s)
     :f4 (parse-float s)
     :f8 (parse-float s)
     ;; FIXME: other formats
