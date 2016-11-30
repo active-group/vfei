@@ -263,39 +263,41 @@
     :f8 (parse-float s)
     ;; FIXME: other formats
     (cond
-     (list-format? format)
-     (loop [s (expect \[ s)
-            items (transient [])]
-       (let [s (skip-whitespace s)]
-         (cond
-          (empty? s) (c/error `parse-data-item-value "unexpected EOF inside list")
-
-          (= \] (first s))
-          [(persistent! items) (rest s)]
-
-          :else
-          (let [[item s] (parse-data-item s)
-                s (skip-whitespace s)]
-            (recur s (conj! items item))))))
-
-     (array-format? format)
-     (let [el-format (array-format-element-format format)]
-       (loop [s (expect \[ s)
-              items (transient [])]
-         (let [s (skip-whitespace s)]
-           (cond
-            (empty? s) (c/error `parse-data-item-value "unexpected EOF inside array")
-
-            (= \] (first s))
-            [(persistent! items) (rest s)]
-
-            :else
-            (let [[v s] (parse-data-item-value el-format s)
-                  s (skip-whitespace s)]
-              (recur s (conj! items v)))))))
-
-     :else
-     (c/assertion-violation `parse-data-item-value "unhandled item format" format))))
+      (list-format? format)
+      (if (= '(\n \u \l \l) (take 4 s))
+        [nil (drop 4 s)]
+        (loop [s (expect \[ s)
+               items (transient [])]
+          (let [s (skip-whitespace s)]
+            (cond
+              (empty? s) (c/error `parse-data-item-value "unexpected EOF inside list")
+              
+              (= \] (first s))
+              [(persistent! items) (rest s)]
+              
+              :else
+              (let [[item s] (parse-data-item s)
+                    s (skip-whitespace s)]
+                (recur s (conj! items item)))))))
+      
+      (array-format? format)
+      (let [el-format (array-format-element-format format)]
+        (loop [s (expect \[ s)
+               items (transient [])]
+          (let [s (skip-whitespace s)]
+            (cond
+              (empty? s) (c/error `parse-data-item-value "unexpected EOF inside array")
+              
+              (= \] (first s))
+              [(persistent! items) (rest s)]
+              
+              :else
+              (let [[v s] (parse-data-item-value el-format s)
+                    s (skip-whitespace s)]
+                (recur s (conj! items v)))))))
+      
+      :else
+      (c/assertion-violation `parse-data-item-value "unhandled item format" format))))
 
 (defn parse-data-item
   "Parse a VFEI data item, returning it and the rest."

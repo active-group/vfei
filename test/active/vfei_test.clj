@@ -45,6 +45,25 @@ INSTANCE/A=\"0\"")))
   (is (= [(vfei/make-data-item "CT" :i4 -5)]
          (vfei/parse-vfei "CT/I4=-5")))
 
+  (is (= 
+       [(vfei/make-data-item "CMD" :a "executeCommand")
+        (vfei/make-data-item "CT" :i4 0)
+        (vfei/make-data-item "TX" :a "")
+        (vfei/make-data-item "MODULE" :a "commandExecuter")
+        (vfei/make-data-item "APPLICATION" :a "test")
+        (vfei/make-data-item "CONTENTS" (vfei/make-list-format 0) nil)
+        (vfei/make-data-item "INSTANCE" :b 4)]
+       (vfei/parse-vfei "CMD/A=\"executeCommand\"
+CT/I4=0
+TX/A=\"\"
+MODULE/A=\"commandExecuter\"
+APPLICATION/A=\"test\"
+CONTENTS/L[0]=null
+INSTANCE/B=4")))
+  
+  (is (= [(vfei/make-data-item "CT" :i4 -5)]
+         (vfei/parse-vfei "CT/I4=-5")))
+
   (is (= [(vfei/make-data-item "COMPID" 
                                (vfei/make-array-format :a 25)
                                ["USR.1"
