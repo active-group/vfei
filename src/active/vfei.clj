@@ -332,6 +332,17 @@
   (zipmap (map data-item-name items)
           items))
 
+(defn vfei->map
+  "Recursivley convert the result of `parse-vfei` to a key-value
+  map."
+  [v]
+  (reduce-kv #(assoc %1 %2
+                     (let [v (data-item-value %3)]
+                       (if (list-format? (data-item-format %3))
+                         (vfei->map v)
+                         v)))
+             {} (data-items->map v)))
+
 (defn vfei-encode-char
   "Encode a character in VFEI format."
   [c]

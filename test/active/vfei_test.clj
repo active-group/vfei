@@ -130,7 +130,29 @@ USR3/N=.5e5")))
          (vfei/parse-vfei "CMD/A=\"CHANGE\" EVENT_ID/A=\"CHANGE\" ACTION/A=\"CHANGE\" EVREASON/A=\"11\"OLDSTATE/A=\"RUN\" NEWSTATE/A=\"WAIT\" LIST_1/L[21]=[$VERSION/A=\"1.0\" $COUNTER/A=\"1\" $INTEGRITY/A=\"1\" $RANDOM/A=\"9173289511\"] CATEGORY/A=\"ABC123\"")))
 
 )
-         
+
+(deftest vfei->map
+  (is (= {"CMD" "Reply.executeTPCommand"
+          "ECD" 0
+          "ETX" ""
+          "MODULE" "executeTPCommand"
+          "APPLICATION" "promisgateway"
+          "CONTENTS" {"USR0" nil
+                      "USR1" 1.5
+                      "USR2" 0.5
+                      "USR3" 50000.0}
+          "INSTANCE" 4}
+         (vfei/vfei->map (vfei/parse-vfei "CMD/A=\"Reply.executeTPCommand\"
+ECD/I4=0
+ETX/A=\"\"
+MODULE/A=\"executeTPCommand\"
+APPLICATION/A=\"promisgateway\"
+CONTENTS/L[0]=[USR0/N=null
+USR1/N=1.5
+USR2/N=.5
+USR3/N=.5e5]
+INSTANCE/B=4")))))
+
 (deftest vfei-encode-string
   (is (= "\"abc\""
          (vfei/vfei-encode-string "abc")))
