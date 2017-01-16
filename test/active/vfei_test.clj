@@ -28,6 +28,7 @@
 SERVICE1
 SERVICE2
 ")])
+        (vfei/make-data-item "RESTART" :bl 0)
         (vfei/make-data-item "INSTANCE" :a "0")]
        (vfei/parse-vfei "CMD/A=\"executeCommand\"
 CT/I4=0
@@ -40,6 +41,7 @@ SERVICE1
 SERVICE2
 \"
 ]
+RESTART/BL=0
 INSTANCE/A=\"0\"")))
 
   (is (= [(vfei/make-data-item "CT" :i4 -5)]

@@ -193,15 +193,14 @@
                         (and (= c f)
                              [code s]))
               [base-code s] (or (prefix1 \A :a)
-                                (prefix1 \B :b)
                                 (prefix1 \N :n) ; see decode-vfe-n
                                 (if (empty? s)
                                   (c/error `parse-format-code "unexpected EOF, incomplete format code")
                                   (let [n (first s)
-                                        s (rest s)
+                                        s' (rest s)
                                         prefix2 (fn [c2 code]
                                                   (and (= c2 n)
-                                                       [code s]))]
+                                                       [code s']))]
                                     (case f
                                       \U (or (prefix2 \1 :u1)
                                              (prefix2 \2 :u2)
@@ -217,7 +216,7 @@
                                              (prefix2 \8 :f8)
                                              (c/error `parse-format-code "invalid format code" (str f n)))
                                       \B (or (prefix2 \L :bl)
-                                             (c/error `parse-format-code "invalid format code" (str f n)))))))
+                                             [:b s])))))
               s (skip-whitespace s)]
           (if (= \[ (first s))
             (let [s (skip-whitespace s)
@@ -261,6 +260,7 @@
     :u8 (parse-integer s)
     :f4 (parse-float s)
     :f8 (parse-float s)
+    :bl (parse-integer s) ;; FIXME: probably integer representation of booleans
     ;; FIXME: other formats
     (cond
       (list-format? format)
