@@ -2,7 +2,8 @@
   "Encode and decode VFEI messages."
   (:require [active.clojure.record :refer :all]
             [active.clojure.condition :as c]
-            [clojure.string :as string]))
+            [clojure.string :as string])
+  (:import [java.time ZonedDateTime]))
 
 (defn skip-whitespace
   [s]
@@ -170,6 +171,11 @@
            [(Double/parseDouble (apply str (persistent! t)))
             s]))))))
 
+(defn- parse-zoned-date-time
+  [s]
+  (let [[v s] (decode-vfei-string s)]
+    [(ZonedDateTime/parse v) s]))
+
 (defn parse-size
   "Parse the size of a list or array item, returning it and the rest."
   [s]
@@ -194,6 +200,7 @@
                              [code s]))
               [base-code s] (or (prefix1 \A :a)
                                 (prefix1 \N :n) ; see decode-vfe-n
+                                (prefix1 \D :d)
                                 (if (empty? s)
                                   (c/error `parse-format-code "unexpected EOF, incomplete format code")
                                   (let [n (first s)
@@ -260,6 +267,7 @@
     :u8 (parse-integer s)
     :f4 (parse-float s)
     :f8 (parse-float s)
+    :d (parse-zoned-date-time s)
     :bl (parse-integer s) ;; FIXME: probably integer representation of booleans
     ;; FIXME: other formats
     (cond

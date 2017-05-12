@@ -1,7 +1,8 @@
 (ns active.vfei-test
   (:require [active.vfei :as vfei]
             [active.quickcheck :as qc]
-            [clojure.test :refer :all]))
+            [clojure.test :refer :all])
+  (:import [java.time ZonedDateTime ZoneId]))
 
 (deftest decode-vfei-string
   (is (= ["abc" ""]
@@ -65,6 +66,9 @@ INSTANCE/B=4")))
   
   (is (= [(vfei/make-data-item "CT" :i4 -5)]
          (vfei/parse-vfei "CT/I4=-5")))
+
+  (is (= [(vfei/make-data-item "DATE" :d (ZonedDateTime/of 2017 2 2 8 33 46 45 (ZoneId/of "Z")))]
+         (vfei/parse-vfei "DATE/D=\"2017-02-02T08:33:46.000000045Z\"")))
 
   (is (= [(vfei/make-data-item "COMPID" 
                                (vfei/make-array-format :a 25)
