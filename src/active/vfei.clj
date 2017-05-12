@@ -351,6 +351,51 @@
                          v)))
              {} (data-items->map v)))
 
+(declare format->expr value->expr data-item->expr data-items->expr)
+
+(defn format->expr
+  "Convert a format to a Clojure expression that generates it.
+
+For generating tests."
+  [f]
+  (cond
+    (list-format? f) `(~'vfei/make-list-format ~(list-format-size f))
+    (array-format? f) `(~'vfei/make-array-format
+                        ~(format->expr (array-format-element-format f))
+                        ~(array-format-size f))
+    :else f))
+ 
+
+(defn value->expr
+  "Convert a value to a Clojure expression that generates it.
+
+For generating tests."
+  [v]
+  (cond
+    (integer? v) v
+    (string? v) v
+    (vector? v) (mapv value->expr v)
+    (data-item? v) (data-item->expr v)
+    (instance? ZonedDateTime v) `(ZonedDateTime/parse ~(str v))
+    :else
+    (c/assertion-violation `value->expr "unknown value" v)))
+
+(defn data-item->expr
+  "Convert a data item to a Clojure expression that generates it.
+
+For generating tests."
+  [di]
+  `(~'vfei/make-data-item ~(data-item-name di)
+    ~(format->expr (data-item-format di))
+    ~(value->expr (data-item-value di))))
+
+(defn data-items->expr
+  "Convert a seq of data items to a Clojure expression that generates it.
+
+For generating tests."
+  [sq]
+  (mapv data-item->expr sq))
+
 (defn vfei-encode-char
   "Encode a character in VFEI format."
   [c]
