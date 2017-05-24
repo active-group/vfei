@@ -173,8 +173,10 @@
 
 (defn- parse-zoned-date-time
   [s]
-  (let [[v s] (decode-vfei-string s)]
-    [(ZonedDateTime/parse v) s]))
+  (if (= '(\n \u \l \l) (take 4 s))
+    [nil (drop 4 s)]
+    (let [[v s] (decode-vfei-string s)]
+      [(ZonedDateTime/parse v) s])))
 
 (defn parse-size
   "Parse the size of a list or array item, returning it and the rest."
@@ -374,6 +376,7 @@ For generating tests."
   (cond
     (integer? v) v
     (string? v) v
+    (nil? v) v
     (vector? v) (mapv value->expr v)
     (data-item? v) (data-item->expr v)
     (instance? ZonedDateTime v) `(ZonedDateTime/parse ~(str v))
