@@ -63,6 +63,23 @@ MODULE/A=\"commandExecuter\"
 APPLICATION/A=\"test\"
 CONTENTS/L[0]=null
 INSTANCE/B=4")))
+
+    (is (= 
+       [(vfei/make-data-item "CMD" :a nil)
+        (vfei/make-data-item "CT" :i4 nil)
+        (vfei/make-data-item "TX" :a nil)
+        (vfei/make-data-item "MODULE" :a nil)
+        (vfei/make-data-item "APPLICATION" :a nil)
+        (vfei/make-data-item "CONTENTS" (vfei/make-list-format 0) nil)
+        (vfei/make-data-item "INSTANCE" :b nil)]
+       (vfei/parse-vfei "CMD/A=null
+CT/I4=null
+TX/A=null
+MODULE/A=null
+APPLICATION/A=null
+CONTENTS/L[0]=null
+INSTANCE/B=null"
+                        :null-anywhere)))
   
   (is (= [(vfei/make-data-item "CT" :i4 -5)]
          (vfei/parse-vfei "CT/I4=-5")))

@@ -254,64 +254,67 @@
 
 (defn parse-data-item-value
   "Parse the value of a VFEI data item, given its format, returning it and the rest."
-  [format s]
-  (case format
-    :a (decode-vfei-string s)
-    :n (decode-vfei-n s)
-    :b (parse-integer s) ;; FIXME: is this binary? Is parse-integer OK?
-    :i1 (parse-integer s) ;; FIXME: validation
-    :i2 (parse-integer s) ;; FIXME: validation
-    :i4 (parse-integer s) ;; FIXME: validation
-    :i8 (parse-integer s) ;; FIXME: validation
-    :u1 (parse-integer s)
-    :u2 (parse-integer s)
-    :u4 (parse-integer s)
-    :u8 (parse-integer s)
-    :f4 (parse-float s)
-    :f8 (parse-float s)
-    :d (parse-zoned-date-time s)
-    :bl (parse-integer s) ;; FIXME: probably integer representation of booleans
-    ;; FIXME: other formats
-    (cond
-      (list-format? format)
-      (if (= '(\n \u \l \l) (take 4 s))
-        [nil (drop 4 s)]
-        (loop [s (expect \[ s)
-               items (transient [])]
-          (let [s (skip-whitespace s)]
-            (cond
-              (empty? s) (c/error `parse-data-item-value "unexpected EOF inside list")
-              
-              (= \] (first s))
-              [(persistent! items) (rest s)]
-              
-              :else
-              (let [[item s] (parse-data-item s)
-                    s (skip-whitespace s)]
-                (recur s (conj! items item)))))))
-      
-      (array-format? format)
-      (let [el-format (array-format-element-format format)]
-        (loop [s (expect \[ s)
-               items (transient [])]
-          (let [s (skip-whitespace s)]
-            (cond
-              (empty? s) (c/error `parse-data-item-value "unexpected EOF inside array")
-              
-              (= \] (first s))
-              [(persistent! items) (rest s)]
-              
-              :else
-              (let [[v s] (parse-data-item-value el-format s)
-                    s (skip-whitespace s)]
-                (recur s (conj! items v)))))))
-      
-      :else
-      (c/assertion-violation `parse-data-item-value "unhandled item format" format))))
+  [format null-anywhere? s]
+  (if (and null-anywhere?
+           (= [\n \u \l \l] (take 4 s)))
+    [nil (drop 4 s)]
+    (case format
+      :a (decode-vfei-string s)
+      :n (decode-vfei-n s)
+      :b (parse-integer s) ;; FIXME: is this binary? Is parse-integer OK?
+      :i1 (parse-integer s) ;; FIXME: validation
+      :i2 (parse-integer s) ;; FIXME: validation
+      :i4 (parse-integer s) ;; FIXME: validation
+      :i8 (parse-integer s) ;; FIXME: validation
+      :u1 (parse-integer s)
+      :u2 (parse-integer s)
+      :u4 (parse-integer s)
+      :u8 (parse-integer s)
+      :f4 (parse-float s)
+      :f8 (parse-float s)
+      :d (parse-zoned-date-time s)
+      :bl (parse-integer s) ;; FIXME: probably integer representation of booleans
+      ;; FIXME: other formats
+      (cond
+        (list-format? format)
+        (if (= '(\n \u \l \l) (take 4 s))
+          [nil (drop 4 s)]
+          (loop [s (expect \[ s)
+                 items (transient [])]
+            (let [s (skip-whitespace s)]
+              (cond
+                (empty? s) (c/error `parse-data-item-value "unexpected EOF inside list")
+                
+                (= \] (first s))
+                [(persistent! items) (rest s)]
+                
+                :else
+                (let [[item s] (parse-data-item s null-anywhere?)
+                      s (skip-whitespace s)]
+                  (recur s (conj! items item)))))))
+        
+        (array-format? format)
+        (let [el-format (array-format-element-format format)]
+          (loop [s (expect \[ s)
+                 items (transient [])]
+            (let [s (skip-whitespace s)]
+              (cond
+                (empty? s) (c/error `parse-data-item-value "unexpected EOF inside array")
+                
+                (= \] (first s))
+                [(persistent! items) (rest s)]
+                
+                :else
+                (let [[v s] (parse-data-item-value el-format null-anywhere? s)
+                      s (skip-whitespace s)]
+                  (recur s (conj! items v)))))))
+        
+        :else
+        (c/assertion-violation `parse-data-item-value "unhandled item format" format)))))
 
 (defn parse-data-item
   "Parse a VFEI data item, returning it and the rest."
-  [s]
+  [s null-anywhere?]
   (let [s (skip-whitespace s)
         [name s] (parse-data-item-name s)
         s (skip-whitespace s)
@@ -321,18 +324,21 @@
         s (skip-whitespace s)
         s (expect \= s)
         s (skip-whitespace s)
-        [value s] (parse-data-item-value format s)]
+        [value s] (parse-data-item-value format null-anywhere? s)]
     [(make-data-item name format value) s]))
 
 (defn parse-vfei
-  "Parse a VFEI message, returning a list of data items."
-  [s]
+  "Parse a VFEI message, returning a list of data items.
+
+  `null-anywhere?` says whethere `null` (Systema extension) is allowed anywhere
+  or just for `A`, `N`, `D`, and lists."
+  [s & [null-anywhere?]]
   (loop [s (seq s)
          items (transient [])]
     (let [s (skip-whitespace s)]
       (if (empty? s)
         (persistent! items)
-        (let [[item s] (parse-data-item s)
+        (let [[item s] (parse-data-item s null-anywhere?)
               s (skip-whitespace s)]
           (recur s (conj! items item)))))))
 
