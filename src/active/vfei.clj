@@ -256,6 +256,7 @@
   "Parse the value of a VFEI data item, given its format, returning it and the rest."
   [format null-anywhere? s]
   (if (and null-anywhere?
+           (= \n (first s)) ; optimization
            (= [\n \u \l \l] (take 4 s)))
     [nil (drop 4 s)]
     (case format
