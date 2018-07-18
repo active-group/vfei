@@ -8,7 +8,7 @@
 (defn skip-whitespace
   [s]
   "Skip leading whitespace from a string, returning a seq of the remaining characters."
-  (loop [s (seq s)]
+  (loop [s s]
     (cond
      (empty? s) s
      (Character/isWhitespace (char (first s))) (recur (rest s))
@@ -26,7 +26,7 @@
         (case c
           ;; Systema extension
           \n (if (= [\u \l \l] (take 3 s))
-               [nil (string/join (drop 3 s))] 
+               [nil (drop 3 s)]
                (c/error `decode-vfei-string "expected a string literal" (string/join (cons c s))))
 
           \" (loop [s s]
@@ -35,7 +35,7 @@
                  (let [c (first s)
                        s (rest s)]
                    (case c
-                     \" [(.toString builder) (apply str s)]
+                     \" [(.toString builder) s]
                      \\ (if (empty? s)
                           (c/error `decode-vfei-string "premature end of string literal" (.toString builder))
                           (case (first s)
@@ -146,7 +146,7 @@
            seen-e? false
            t (transient [])]
       (if (empty? s) 
-        [(Double/parseDouble (apply str (persistent! t))) s]
+        [(Double/parseDouble (string/join (persistent! t))) s]
         (let [c (char (first s))]
        
           (cond
@@ -168,12 +168,12 @@
            (c/error `parse-float "invalid termination of float literal" c)
 
            :else
-           [(Double/parseDouble (apply str (persistent! t)))
+           [(Double/parseDouble (string/join (persistent! t)))
             s]))))))
 
 (defn- parse-zoned-date-time
-  [s]
-  (if (= '(\n \u \l \l) (take 4 s))
+  [s & [null-anywhere?]]
+  (if (and null-anywhere? (= '(\n \u \l \l) (take 4 s)))
     [nil (drop 4 s)]
     (let [[v s] (decode-vfei-string s)]
       [(ZonedDateTime/parse v) s])))
@@ -273,7 +273,7 @@
       :u8 (parse-integer s)
       :f4 (parse-float s)
       :f8 (parse-float s)
-      :d (parse-zoned-date-time s)
+      :d (parse-zoned-date-time s null-anywhere?)
       :bl (parse-integer s) ;; FIXME: probably integer representation of booleans
       ;; FIXME: other formats
       (cond
@@ -350,8 +350,8 @@
           items))
 
 (defn vfei->map
-  "Recursivley convert the result of `parse-vfei` to a key-value
-  map."
+  "Recursivley convert the result of `parse-vfei` to a key-value map.
+  Warning: This function does not keep the order of the elements in VFEI lists."
   [v]
   (reduce-kv #(assoc %1 %2
                      (let [v (data-item-value %3)]

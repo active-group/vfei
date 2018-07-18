@@ -5,15 +5,15 @@
   (:import [java.time ZonedDateTime ZoneId]))
 
 (deftest decode-vfei-string
-  (is (= ["abc" ""]
+  (is (= ["abc" []]
          (vfei/decode-vfei-string "\"abc\"")))
-  (is (= ["\u0007\u0008\u000c\n\r\t\u000b\\'\"?" ""]
+  (is (= ["\u0007\u0008\u000c\n\r\t\u000b\\'\"?" []]
          (vfei/decode-vfei-string "\"\\a\\b\\f\\n\\r\\t\\v\\\\\\'\\\"\\?\"")))
-  (is (= ["\u0007" ""]
+  (is (= ["\u0007" []]
          (vfei/decode-vfei-string "\"\\007\"")))
-  (is (= ["abc" "foobar"]
+  (is (= ["abc" [\f \o \o \b \a \r]]
          (vfei/decode-vfei-string "\"abc\"foobar")))
-  (is (= [nil " foobar"]
+  (is (= [nil [\space \f \o \o \b \a \r]]
          (vfei/decode-vfei-string "null foobar"))))
 
 (deftest parse-vfei
@@ -209,5 +209,5 @@ INSTANCE/B=4")))))
    (quickcheck
     (qc/property [s ascii-string]
                  (qc/==> (ascii<127? s)
-                         (= [s ""]
+                         (= [s []]
                             (vfei/decode-vfei-string (vfei/vfei-encode-string s))))))))
