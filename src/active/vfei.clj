@@ -86,11 +86,23 @@
 
 (define-record-type DataItem
   (^{:doc "Make a VFEI data item."}
-   make-data-item name format value)
+   really-make-data-item name format value)
   data-item?
   [name data-item-name 
    format data-item-format
    value data-item-value])
+
+(defn make-data-item
+  "Assert that list length matches format."
+  [name format value]
+  (cond
+    (list-format? format)
+    (when (not= (list-format-size format) (count value))
+      (c/error `make-data-item "list length does not match number of parsed values" name format (count value) value))
+    (array-format? format)
+    (when (not= (array-format-size format) (count value))
+      (c/error `make-data-item "array size does not match number of parsed values" name format (count value) value)))
+  (really-make-data-item name format value))
 
 (defn parse-data-item-name
   "Parse the name of a VFEI data item, returning a pair of the name and the rest."

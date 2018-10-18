@@ -142,13 +142,13 @@ USR3/N=.5e5")))
           (vfei/make-data-item "OLDSTATE" :a "RUN")
           (vfei/make-data-item "NEWSTATE" :a "WAIT")
           (vfei/make-data-item "LIST_1" 
-                               (vfei/make-list-format 21) 
+                               (vfei/make-list-format 4) 
                                [(vfei/make-data-item "$VERSION" :a "1.0")
                                 (vfei/make-data-item "$COUNTER" :a "1")
                                 (vfei/make-data-item "$INTEGRITY" :a "1")
                                 (vfei/make-data-item "$RANDOM" :a "9173289511")])
           (vfei/make-data-item "CATEGORY" :a "ABC123")]
-         (vfei/parse-vfei "CMD/A=\"CHANGE\" EVENT_ID/A=\"CHANGE\" ACTION/A=\"CHANGE\" EVREASON/A=\"11\"OLDSTATE/A=\"RUN\" NEWSTATE/A=\"WAIT\" LIST_1/L[21]=[$VERSION/A=\"1.0\" $COUNTER/A=\"1\" $INTEGRITY/A=\"1\" $RANDOM/A=\"9173289511\"] CATEGORY/A=\"ABC123\"")))
+         (vfei/parse-vfei "CMD/A=\"CHANGE\" EVENT_ID/A=\"CHANGE\" ACTION/A=\"CHANGE\" EVREASON/A=\"11\"OLDSTATE/A=\"RUN\" NEWSTATE/A=\"WAIT\" LIST_1/L[4]=[$VERSION/A=\"1.0\" $COUNTER/A=\"1\" $INTEGRITY/A=\"1\" $RANDOM/A=\"9173289511\"] CATEGORY/A=\"ABC123\"")))
 
 )
 
@@ -168,7 +168,7 @@ ECD/I4=0
 ETX/A=\"\"
 MODULE/A=\"executeTPCommand\"
 APPLICATION/A=\"promisgateway\"
-CONTENTS/L[0]=[USR0/N=null
+CONTENTS/L[4]=[USR0/N=null
 USR1/N=1.5
 USR2/N=.5
 USR3/N=.5e5]
