@@ -3,6 +3,6 @@
   :url "https://github.com/active-group/vfei"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.8.0"]
-                 [active-clojure "0.11.0"]
-                 [active-quickcheck "0.3.0"]])
+  :dependencies [[org.clojure/clojure "1.10.0"]
+                 [de.active-group/active-clojure "0.29.0"]
+                 [de.active-group/active-quickcheck "0.7.0"]])
