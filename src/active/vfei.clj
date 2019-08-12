@@ -1,6 +1,7 @@
 (ns active.vfei
   "Encode and decode VFEI messages."
   (:require [active.clojure.record :refer :all]
+            [active.clojure.lens :as lens]
             [active.clojure.condition :as c]
             [clojure.string :as string])
   (:import [java.time ZonedDateTime]))
@@ -355,21 +356,66 @@
               s (skip-whitespace s)]
           (recur s (conj! items item)))))))
 
+(define-record-type AmbigousFieldsValues
+  (^{:doc "Values (numbered) of ambiguous fields on one level."}
+   make-ambiguous-fields-values mp)
+  ambiguous-fields-values?
+  [mp ambiguous-fields-values-mp])
+
+(defn assoc-ambiguous
+  [m k v]
+  (update m k (fn [v*]
+                (if v*
+                  (if (ambiguous-fields-values? v*)
+                    (lens/overhaul v* ambiguous-fields-values-mp #(assoc % (count (keys %)) v))
+                    (make-ambiguous-fields-values {0 v* 1 v}))
+                  v))))
+
+(defn zipmap-ambiguous
+  "Returns a map with the keys mapped to the corresponding vals.
+  Ambigous keys yield a map with numbered values."
+  [keys vals]
+  (loop [map {}
+         ks (seq keys)
+         vs (seq vals)]
+    (if (and ks vs)
+      (recur (assoc-ambiguous map (first ks) (first vs))
+             (next ks)
+             (next vs))
+      map)))
+
 (defn data-items->map
   "Convert a list of VFEI data items into a map."
   [items]
-  (zipmap (map data-item-name items)
-          items))
+  (zipmap-ambiguous (map data-item-name items)
+                    items))
+
+(declare vfei->map)
+
+(defn data-item->map-value
+  [div]
+  (let [v (data-item-value div)]
+    (if (list-format? (data-item-format div))
+      (vfei->map v)
+      v)))
 
 (defn vfei->map
   "Recursivley convert the result of `parse-vfei` to a key-value map.
-  Warning: This function does not keep the order of the elements in VFEI lists."
+  Warning: This function does not keep the order of the elements in VFEI lists.
+  Values of ambiguous fields on one level yield a map with numbers as keys and
+  values of the ambiguous fields as the values to the numbered keys."
   [v]
   (reduce-kv #(assoc %1 %2
-                     (let [v (data-item-value %3)]
-                       (if (list-format? (data-item-format %3))
-                         (vfei->map v)
-                         v)))
+                     (cond
+                       (data-item? %3)
+                       (data-item->map-value %3)
+
+                       (ambiguous-fields-values? %3)
+                       (reduce-kv (fn [a af av]
+                                    (assoc a af (data-item->map-value av)))
+                                  {} (ambiguous-fields-values-mp %3))
+                       :else
+                       (assert false "Unexpected value.")))
              {} (data-items->map v)))
 
 (declare format->expr value->expr data-item->expr data-items->expr)
