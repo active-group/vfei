@@ -155,19 +155,19 @@ USR3/N=.5e5")))
 (deftest assoc-ambiguous
   (is (= {:a 23}
          (vfei/assoc-ambiguous {} :a 23)))
-  (is (= {:a (vfei/make-ambiguous-fields-values {0 23 1 42})}
-         (vfei/assoc-ambiguous {:a (vfei/make-ambiguous-fields-values {0 23})} :a 42)))
-  (is (= {:a (vfei/make-ambiguous-fields-values {0 23 1 42 2 65})}
-         (vfei/assoc-ambiguous {:a (vfei/make-ambiguous-fields-values {0 23 1 42})} :a 65))))
+  (is (= {:a (vfei/make-ambiguous-fields-values {"0" 23 "1" 42})}
+         (vfei/assoc-ambiguous {:a (vfei/make-ambiguous-fields-values {"0" 23})} :a 42)))
+  (is (= {:a (vfei/make-ambiguous-fields-values {"0" 23 "1" 42 "2" 65})}
+         (vfei/assoc-ambiguous {:a (vfei/make-ambiguous-fields-values {"0" 23 "1" 42})} :a 65))))
 
 (deftest zipmap-ambiguous
   (is (= {}
          (vfei/zipmap-ambiguous [] [])))
   (is (= {:a 23}
          (vfei/zipmap-ambiguous [:a] [23])))
-  (is (= {:a (vfei/make-ambiguous-fields-values {0 23 1 42})}
+  (is (= {:a (vfei/make-ambiguous-fields-values {"0" 23 "1" 42})}
          (vfei/zipmap-ambiguous [:a :a] [23 42])))
-  (is (= {:a (vfei/make-ambiguous-fields-values {0 23 1 42 2 65})}
+  (is (= {:a (vfei/make-ambiguous-fields-values {"0" 23 "1" 42 "2" 65})}
          (vfei/zipmap-ambiguous [:a :a :a] [23 42 65]))))
 
 (deftest vfei->map-ambiguous
@@ -176,11 +176,11 @@ USR3/N=.5e5")))
           "ETX" ""
           "MODULE" "executeTPCommand"
           "APPLICATION" "promisgateway"
-          "CONTENTS" {"USR" {0 nil
-                             1 1.5
-                             2 0.5
-                             3 50000.0}}
-          "INSTANCE" {0 4 1 5}}
+          "CONTENTS" {"USR" {"0" nil
+                             "1" 1.5
+                             "2" 0.5
+                             "3" 50000.0}}
+          "INSTANCE" {"0" 4 "1" 5}}
          (vfei/vfei->map (vfei/parse-vfei "CMD/A=\"Reply.executeTPCommand\"
 ECD/I4=0
 ETX/A=\"\"
@@ -188,6 +188,25 @@ MODULE/A=\"executeTPCommand\"
 APPLICATION/A=\"promisgateway\"
 CONTENTS/L[4]=[USR/N=null USR/N=1.5 USR/N=.5 USR/N=.5e5]
 INSTANCE/B=4 INSTANCE/B=5")))))
+
+(deftest vfei->map-ambiguous-equal
+  (is (= {"CMD" "Reply.executeTPCommand"
+          "ECD" 0
+          "ETX" ""
+          "MODULE" "executeTPCommand"
+          "APPLICATION" "promisgateway"
+          "CONTENTS" {"USR" {"0" nil
+                             "1" 1.5
+                             "2" 0.5
+                             "3" 50000.0}}
+          "INSTANCE" 5}
+         (vfei/vfei->map (vfei/parse-vfei "CMD/A=\"Reply.executeTPCommand\"
+ECD/I4=0
+ETX/A=\"\"
+MODULE/A=\"executeTPCommand\"
+APPLICATION/A=\"promisgateway\"
+CONTENTS/L[4]=[USR/N=null USR/N=1.5 USR/N=.5 USR/N=.5e5]
+INSTANCE/A=\"5\" INSTANCE/B=5")))))
 
 (deftest vfei->map
   (is (= {"CMD" "Reply.executeTPCommand"
