@@ -189,6 +189,25 @@ APPLICATION/A=\"promisgateway\"
 CONTENTS/L[4]=[USR/N=null USR/N=1.5 USR/N=.5 USR/N=.5e5]
 INSTANCE/B=4 INSTANCE/B=5")))))
 
+(deftest vfei->map-ambiguous-equal
+  (is (= {"CMD" "Reply.executeTPCommand"
+          "ECD" 0
+          "ETX" ""
+          "MODULE" "executeTPCommand"
+          "APPLICATION" "promisgateway"
+          "CONTENTS" {"USR" {0 nil
+                             1 1.5
+                             2 0.5
+                             3 50000.0}}
+          "INSTANCE" 5}
+         (vfei/vfei->map (vfei/parse-vfei "CMD/A=\"Reply.executeTPCommand\"
+ECD/I4=0
+ETX/A=\"\"
+MODULE/A=\"executeTPCommand\"
+APPLICATION/A=\"promisgateway\"
+CONTENTS/L[4]=[USR/N=null USR/N=1.5 USR/N=.5 USR/N=.5e5]
+INSTANCE/A=\"5\" INSTANCE/B=5")))))
+
 (deftest vfei->map
   (is (= {"CMD" "Reply.executeTPCommand"
           "ECD" 0

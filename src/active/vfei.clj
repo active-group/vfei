@@ -365,11 +365,23 @@
 (defn assoc-ambiguous
   [m k v]
   (update m k (fn [v*]
-                (if v*
-                  (if (ambiguous-fields-values? v*)
-                    (lens/overhaul v* ambiguous-fields-values-mp #(assoc % (count (keys %)) v))
-                    (make-ambiguous-fields-values {0 v* 1 v}))
-                  v))))
+                (cond
+                  ;; key not in map at all
+                  (nil? v*)
+                  v
+
+                  ;; already multiple keys in map
+                  (ambiguous-fields-values? v*)
+                  (lens/overhaul v* ambiguous-fields-values-mp #(assoc % (str (count (keys %))) v))
+
+                  ;; only one key in map -- check "untyped" equality to keep
+                  ;; backwards compatibility of ambiguous fields semantics
+                  (and (data-item? v*) (data-item? v)
+                       (= (str (data-item-value v*)) (str (data-item-value v))))
+                  v
+
+                  :else
+                  (make-ambiguous-fields-values {"0" v* "1" v})))))
 
 (defn zipmap-ambiguous
   "Returns a map with the keys mapped to the corresponding vals.
