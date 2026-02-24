@@ -151,37 +151,40 @@
 
         :else [(sign v) s]))))
 
-(defn- parse-float
+(defn parse-float
   [s]
   (let [s (skip-whitespace s)]
-    (loop [s s
-           seen-e? false
-           t (transient [])]
-      (if (empty? s)
-        [(Double/parseDouble (string/join (persistent! t))) s]
-        (let [c (char (first s))]
+    (if (= '(\N \a \N) (take 3 s))
+      [Double/NaN (drop 3 s)]
 
-          (cond
+      (loop [s s
+             seen-e? false
+             t (transient [])]
+        (if (empty? s)
+          [(Double/parseDouble (string/join (persistent! t))) s]
+          (let [c (char (first s))]
 
-            (Character/isDigit c)
-            (recur (rest s) false (conj! t c))
+            (cond
 
-            (or (= \e c) (= \E c))
-            (do
-              (when seen-e?
-                (c/error `parse-float "unexpected character in float literal" c))
-              (recur (rest s) true (conj! t c)))
+              (Character/isDigit c)
+              (recur (rest s) false (conj! t c))
 
-            (or (= \. c) (= \- c))
-            (recur (rest s) false (conj! t c))
+              (or (= \e c) (= \E c))
+              (do
+                (when seen-e?
+                  (c/error `parse-float "unexpected character in float literal" c))
+                (recur (rest s) true (conj! t c)))
 
-            ;; e can't terminate - dot or digit can
-            seen-e?
-            (c/error `parse-float "invalid termination of float literal" c)
+              (or (= \. c) (= \- c))
+              (recur (rest s) false (conj! t c))
 
-            :else
-            [(Double/parseDouble (string/join (persistent! t)))
-             s]))))))
+              ;; e can't terminate - dot or digit can
+              seen-e?
+              (c/error `parse-float "invalid termination of float literal" c)
+
+              :else
+              [(Double/parseDouble (string/join (persistent! t)))
+               s])))))))
 
 (defn- parse-zoned-date-time
   [s & [null-anywhere?]]

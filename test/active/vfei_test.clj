@@ -4,6 +4,15 @@
             [clojure.test :refer :all])
   (:import [java.time ZonedDateTime ZoneId]))
 
+(deftest parse-float
+  (is (= [12.0 []]
+         (vfei/parse-float "12")))
+  (is (= [-12.0 []]
+         (vfei/parse-float "-12")))
+  (is (= [-12.0 [\N \a \N]]
+         (vfei/parse-float "-12NaN")))
+  (is (Double/isNaN (first (vfei/parse-float "NaN")))))
+
 (deftest decode-vfei-string
   (is (= ["abc" []]
          (vfei/decode-vfei-string "\"abc\"")))
