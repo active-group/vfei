@@ -111,7 +111,7 @@
   (let [^StringBuilder builder (StringBuilder.)]
     (loop [s s]
       (if (or (empty? s)
-              (= \/ (first s))
+              (and (= \/ (first s)) (not (= \_ (second s))))
               (Character/isWhitespace (char (first s))))
         [(.toString builder) s]
         (do
