@@ -1,4 +1,4 @@
-(defproject de.active-group/vfei "0.12.0"
+(defproject de.active-group/vfei "0.13.0-SNAPSHOT"
   :description "VFEI library"
   :url "https://github.com/active-group/vfei"
   :license {:name "Eclipse Public License"
