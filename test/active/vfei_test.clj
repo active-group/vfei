@@ -17,7 +17,7 @@
          (vfei/decode-vfei-string "null foobar"))))
 
 (deftest parse-vfei
-  (is (= 
+  (is (=
        [(vfei/make-data-item "CMD" :a "executeCommand")
         (vfei/make-data-item "CT" :i4 0)
         (vfei/make-data-item "TX" :a "")
@@ -48,7 +48,7 @@ INSTANCE/A=\"0\"")))
   (is (= [(vfei/make-data-item "CT" :i4 -5)]
          (vfei/parse-vfei "CT/I4=-5")))
 
-  (is (= 
+  (is (=
        [(vfei/make-data-item "CMD" :a "executeCommand")
         (vfei/make-data-item "CT" :i4 0)
         (vfei/make-data-item "TX" :a "")
@@ -64,7 +64,7 @@ APPLICATION/A=\"test\"
 CONTENTS/L[0]=null
 INSTANCE/B=4")))
 
-    (is (= 
+  (is (=
        [(vfei/make-data-item "CMD" :a nil)
         (vfei/make-data-item "CT" :i4 nil)
         (vfei/make-data-item "TX" :a nil)
@@ -80,14 +80,14 @@ APPLICATION/A=null
 CONTENTS/L[0]=null
 INSTANCE/B=null"
                         :null-anywhere)))
-  
+
   (is (= [(vfei/make-data-item "CT" :i4 -5)]
          (vfei/parse-vfei "CT/I4=-5")))
 
   (is (= [(vfei/make-data-item "DATE" :d (ZonedDateTime/of 2017 2 2 8 33 46 45 (ZoneId/of "Z")))]
          (vfei/parse-vfei "DATE/D=\"2017-02-02T08:33:46.000000045Z\"")))
 
-  (is (= [(vfei/make-data-item "COMPID" 
+  (is (= [(vfei/make-data-item "COMPID"
                                (vfei/make-array-format :a 25)
                                ["USR.1"
                                 "USR.2"
@@ -117,19 +117,19 @@ INSTANCE/B=null"
          (vfei/parse-vfei "COMPID/A[25]=[\"USR.1\" \"USR.2\" \"USR.3\" \"USR.4\" \"USR.5\" \"USR.6\" \"USR.7\" \"USR.8\" \"USR.9\" \"USR.10\" \"USR.11\" \"USR.12\" \"USR.13\" \"USR.14\" \"USR.15\" \"USR.16\" \"USR.17\" \"USR.18\" \"USR.19\" \"USR.20\" \"USR.21\" \"USR.22\" \"USR.23\" \"USR.24\" \"USR.25\"]")))
 
   (is (= [(vfei/make-data-item "CMD" :a "executeCommand")
-             (vfei/make-data-item "CT" :i4 50000)
-             (vfei/make-data-item "TX" :a "Kein Wert fÃ¼r Item CONTENTS vorhanden.")
-             (vfei/make-data-item "MODULE" :a "commandExecuter")
-             (vfei/make-data-item "APPLICATION" :a "test-test")
-             (vfei/make-data-item "INSTANCE":a "0")]
+          (vfei/make-data-item "CT" :i4 50000)
+          (vfei/make-data-item "TX" :a "Kein Wert fÃ¼r Item CONTENTS vorhanden.")
+          (vfei/make-data-item "MODULE" :a "commandExecuter")
+          (vfei/make-data-item "APPLICATION" :a "test-test")
+          (vfei/make-data-item "INSTANCE" :a "0")]
 
          (vfei/parse-vfei
           "CMD/A=\"executeCommand\" CT/I4=50000 TX/A=\"Kein Wert fÃ¼r Item CONTENTS vorhanden.\" MODULE/A=\"commandExecuter\" APPLICATION/A=\"test-test\" INSTANCE/A=\"0\"")))
 
   (is (= [(vfei/make-data-item "USR0" :n nil)
-           (vfei/make-data-item "USR1" :n 1.5)
-           (vfei/make-data-item "USR2" :n 0.5)
-           (vfei/make-data-item "USR3" :n 50000.0)]
+          (vfei/make-data-item "USR1" :n 1.5)
+          (vfei/make-data-item "USR2" :n 0.5)
+          (vfei/make-data-item "USR3" :n 50000.0)]
          (vfei/parse-vfei "USR0/N=null
 USR1/N=1.5
 USR2/N=.5
@@ -141,16 +141,14 @@ USR3/N=.5e5")))
           (vfei/make-data-item "EVREASON" :a "11")
           (vfei/make-data-item "OLDSTATE" :a "RUN")
           (vfei/make-data-item "NEWSTATE" :a "WAIT")
-          (vfei/make-data-item "LIST_1" 
-                               (vfei/make-list-format 4) 
+          (vfei/make-data-item "LIST_1"
+                               (vfei/make-list-format 4)
                                [(vfei/make-data-item "$VERSION" :a "1.0")
                                 (vfei/make-data-item "$COUNTER" :a "1")
                                 (vfei/make-data-item "$INTEGRITY" :a "1")
                                 (vfei/make-data-item "$RANDOM" :a "9173289511")])
           (vfei/make-data-item "CATEGORY" :a "ABC123")]
-         (vfei/parse-vfei "CMD/A=\"CHANGE\" EVENT_ID/A=\"CHANGE\" ACTION/A=\"CHANGE\" EVREASON/A=\"11\"OLDSTATE/A=\"RUN\" NEWSTATE/A=\"WAIT\" LIST_1/L[4]=[$VERSION/A=\"1.0\" $COUNTER/A=\"1\" $INTEGRITY/A=\"1\" $RANDOM/A=\"9173289511\"] CATEGORY/A=\"ABC123\"")))
-
-)
+         (vfei/parse-vfei "CMD/A=\"CHANGE\" EVENT_ID/A=\"CHANGE\" ACTION/A=\"CHANGE\" EVREASON/A=\"11\"OLDSTATE/A=\"RUN\" NEWSTATE/A=\"WAIT\" LIST_1/L[4]=[$VERSION/A=\"1.0\" $COUNTER/A=\"1\" $INTEGRITY/A=\"1\" $RANDOM/A=\"9173289511\"] CATEGORY/A=\"ABC123\""))))
 
 (deftest assoc-ambiguous
   (is (= {:a 23}

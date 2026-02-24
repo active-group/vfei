@@ -11,9 +11,9 @@
   "Skip leading whitespace from a string, returning a seq of the remaining characters."
   (loop [s s]
     (cond
-     (empty? s) s
-     (Character/isWhitespace (char (first s))) (recur (rest s))
-     :else s)))
+      (empty? s) s
+      (Character/isWhitespace (char (first s))) (recur (rest s))
+      :else s)))
 
 (defn decode-vfei-string
   "Decode a VFEI-encoded string."
@@ -59,7 +59,7 @@
                                                         (<= i (int \7)))
                                                  (- i (int \0))
                                                  (c/error `decode-vfei-string "invalid octal digit" (string/join s)))))]
-                            
+
                                  (if (not (and d1 d2))
                                    (c/error `decode-vfei-string "premature end of string literal" (.toString builder) d1 d2))
                                  (.append builder (char (+ (* 8 (octal d1)) (octal d2))))
@@ -79,7 +79,7 @@
   [size list-format-size])
 
 (define-record-type ArrayFormat
-  (^{:doc "Make an array format for a VFEI data item."} 
+  (^{:doc "Make an array format for a VFEI data item."}
    make-array-format element-format size)
   array-format?
   [element-format array-format-element-format
@@ -89,7 +89,7 @@
   (^{:doc "Make a VFEI data item."}
    really-make-data-item name format value)
   data-item?
-  [name data-item-name 
+  [name data-item-name
    format data-item-format
    value data-item-value])
 
@@ -122,13 +122,12 @@
   "Expect a character prefix, returning the rest or throwing an exception."
   [c s]
   (cond
-   (empty? s)
-   (c/error `expect (str "unexpected EOF, expected " c) (string/join s))
+    (empty? s)
+    (c/error `expect (str "unexpected EOF, expected " c) (string/join s))
 
-   (= (first s) c) (rest s)
+    (= (first s) c) (rest s)
 
-   :else (c/error `expect (str "expected " c " but got " (first s)) (string/join s))))
-
+    :else (c/error `expect (str "expected " c " but got " (first s)) (string/join s))))
 
 (defn- parse-integer
   "Parse an integer from a string, returning it and the rest."
@@ -137,20 +136,20 @@
         [sign s] (if (= \- (first s))
                    [- (rest s)]
                    [+ s])]
-        
+
     (when-not (Character/isDigit (char (first s)))
       (c/error `parse-integer "expected digit" (first s)))
     (loop [s s
            v 0]
       (cond
-       (empty? s) [(sign v) s]
+        (empty? s) [(sign v) s]
 
-       (Character/isDigit (char (first s)))
-       (recur (rest s)
-              (+ (* v 10)
-                 (Character/digit (char (first s)) 10)))
+        (Character/isDigit (char (first s)))
+        (recur (rest s)
+               (+ (* v 10)
+                  (Character/digit (char (first s)) 10)))
 
-       :else [(sign v) s]))))
+        :else [(sign v) s]))))
 
 (defn- parse-float
   [s]
@@ -158,31 +157,31 @@
     (loop [s s
            seen-e? false
            t (transient [])]
-      (if (empty? s) 
+      (if (empty? s)
         [(Double/parseDouble (string/join (persistent! t))) s]
         (let [c (char (first s))]
-       
+
           (cond
 
-           (Character/isDigit c)
-           (recur (rest s) false (conj! t c))
+            (Character/isDigit c)
+            (recur (rest s) false (conj! t c))
 
-           (or (= \e c) (= \E c))
-           (do
-             (when seen-e?
-               (c/error `parse-float "unexpected character in float literal" c))
-             (recur (rest s) true (conj! t c)))
-           
-           (or (= \. c) (= \- c))
-           (recur (rest s) false (conj! t c))
+            (or (= \e c) (= \E c))
+            (do
+              (when seen-e?
+                (c/error `parse-float "unexpected character in float literal" c))
+              (recur (rest s) true (conj! t c)))
 
-           ;; e can't terminate - dot or digit can
-           seen-e?
-           (c/error `parse-float "invalid termination of float literal" c)
+            (or (= \. c) (= \- c))
+            (recur (rest s) false (conj! t c))
 
-           :else
-           [(Double/parseDouble (string/join (persistent! t)))
-            s]))))))
+            ;; e can't terminate - dot or digit can
+            seen-e?
+            (c/error `parse-float "invalid termination of float literal" c)
+
+            :else
+            [(Double/parseDouble (string/join (persistent! t)))
+             s]))))))
 
 (defn- parse-zoned-date-time
   [s & [null-anywhere?]]
@@ -249,16 +248,16 @@
 (declare parse-data-item)
 
 ;; From: Michael.Kossatz@systemagmbh.de
-;; Subject: Antwort: Re: PULSE-Gateway      
-;; Der Datentyp N (NULL) ist eine Erweiterung der 
-;; VFEI Spec (Ich kann Ihnen jetzt nicht sagen, von wem diese stammt), die 
+;; Subject: Antwort: Re: PULSE-Gateway
+;; Der Datentyp N (NULL) ist eine Erweiterung der
+;; VFEI Spec (Ich kann Ihnen jetzt nicht sagen, von wem diese stammt), die
 ;; vom Systema VFEI Treiber unterstützt wird.
 ;; Wenn der Wert von USR_DATA nicht NULL ist, dann muss das Format F8 sein.
-;; Wenn ein USR_STRING keinen Wert hat, dass muss ein "" übertragen werden. 
-;; Das sollte sich so auch in dem Request, aus dem Sie das USR/L[35] Item 
+;; Wenn ein USR_STRING keinen Wert hat, dass muss ein "" übertragen werden.
+;; Das sollte sich so auch in dem Request, aus dem Sie das USR/L[35] Item
 ;; entnommen haben, so widerspiegeln.
 
-(defn decode-vfei-n 
+(defn decode-vfei-n
   [s]
   (let [s (skip-whitespace s)]
     (if (= '(\n \u \l \l) (take 4 s))
@@ -298,15 +297,15 @@
             (let [s (skip-whitespace s)]
               (cond
                 (empty? s) (c/error `parse-data-item-value "unexpected EOF inside list")
-                
+
                 (= \] (first s))
                 [(persistent! items) (rest s)]
-                
+
                 :else
                 (let [[item s] (parse-data-item s null-anywhere?)
                       s (skip-whitespace s)]
                   (recur s (conj! items item)))))))
-        
+
         (array-format? format)
         (let [el-format (array-format-element-format format)]
           (loop [s (expect \[ s)
@@ -314,15 +313,15 @@
             (let [s (skip-whitespace s)]
               (cond
                 (empty? s) (c/error `parse-data-item-value "unexpected EOF inside array")
-                
+
                 (= \] (first s))
                 [(persistent! items) (rest s)]
-                
+
                 :else
                 (let [[v s] (parse-data-item-value el-format null-anywhere? s)
                       s (skip-whitespace s)]
                   (recur s (conj! items v)))))))
-        
+
         :else
         (c/assertion-violation `parse-data-item-value "unhandled item format" format)))))
 
@@ -443,7 +442,6 @@ For generating tests."
                         ~(format->expr (array-format-element-format f))
                         ~(array-format-size f))
     :else f))
- 
 
 (defn value->expr
   "Convert a value to a Clojure expression that generates it.
@@ -466,8 +464,8 @@ For generating tests."
 For generating tests."
   [di]
   `(~'vfei/make-data-item ~(data-item-name di)
-    ~(format->expr (data-item-format di))
-    ~(value->expr (data-item-value di))))
+                          ~(format->expr (data-item-format di))
+                          ~(value->expr (data-item-value di))))
 
 (defn data-items->expr
   "Convert a seq of data items to a Clojure expression that generates it.
@@ -495,16 +493,15 @@ For generating tests."
     \u0022 "\\\""
     (let [i (int c)]
       (cond
-       (>= i 256)
-       (c/error `vfei-encode-char "invalid VFEI message character" c)
+        (>= i 256)
+        (c/error `vfei-encode-char "invalid VFEI message character" c)
 
-       (or (and (>= i (int \space))
-                (<= i (int \~)))
-           (>= i 128))
-       (str c)
+        (or (and (>= i (int \space))
+                 (<= i (int \~)))
+            (>= i 128))
+        (str c)
 
-       :else (format "\\%03o" i)))))
-     
+        :else (format "\\%03o" i)))))
 
 (defn vfei-encode-string
   "Encode a string as a VFEI style, using C-style escapes."
