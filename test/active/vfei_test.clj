@@ -19,7 +19,10 @@
   (is (= ["CMD_/_" [\/ \A]]
          (vfei/parse-data-item-name "CMD_/_/A")))
   (is (= ["CMD_/_NM" [\/ \A]]
-         (vfei/parse-data-item-name "CMD_/_NM/A"))))
+         (vfei/parse-data-item-name "CMD_/_NM/A")))
+  (is (= ["Field name" [\/ \A]]
+         (vfei/parse-data-item-name "Field name/A"))
+      "names can have whitespace in them"))
 
 (deftest decode-vfei-string
   (is (= ["abc" []]

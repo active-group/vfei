@@ -112,7 +112,7 @@
     (loop [s s]
       (if (or (empty? s)
               (and (= \/ (first s)) (not (= \_ (second s))))
-              (Character/isWhitespace (char (first s))))
+              #_(Character/isWhitespace (char (first s))))
         [(.toString builder) s]
         (do
           (.append builder (first s))
